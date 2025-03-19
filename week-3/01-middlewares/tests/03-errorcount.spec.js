@@ -10,20 +10,28 @@ describe('GET /user', function() {
         expect(response.body.errorCount).toBe(0);
         done();
       })
+      .catch(done)
   });
 
   it('If there is an exception, errCount goes up', function(done) {
+    const promises = []
+
           for (let i = 0; i<10; i++) {
-            request(app)
-                  .get('/user')
-                  .then();
+            promises.push(
+              request(app)
+                    .get('/user')
+                    .expect(404)
+            )
           }
-          request(app)
-              .get('/errorCount')
-              .then(response => {
-                expect(response.body.errorCount).toBe(10);
-                done();
-              })
+
+          Promise.all(promises).then(() => {
+            return request(app)
+                .get('/errorCount')
+                .then(response => {
+                  expect(response.body.errorCount).toBe(10);
+                  done();
+                })
+          })
       });
 
       it('Exception endpoint returns a 404', function(done) {
