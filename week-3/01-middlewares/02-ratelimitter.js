@@ -16,6 +16,28 @@ setInterval(() => {
     numberOfRequestsForUser = {};
 }, 1000)
 
+app.use((req, res, next) => {
+  const userId = req.headers['user-id'];
+
+  if (!userId) {
+    return res.status(404).json({ error: 'User ID is required in headers' });
+  }
+
+  // Check if the userId already exists in the global object
+  if (numberOfRequestsForUser[userId]) {
+    // If user exists, increment the count
+    numberOfRequestsForUser[userId].count++;
+  } else {
+    // If user doesn't exist, create a new entry with count as 1
+    numberOfRequestsForUser[userId] = { count: 1 };
+  }
+
+  if (numberOfRequestsForUser[userId].count >= 5)
+    res.status(404).send()
+
+  next()
+})
+
 app.get('/user', function(req, res) {
   res.status(200).json({ name: 'john' });
 });
